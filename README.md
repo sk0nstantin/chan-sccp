@@ -70,3 +70,32 @@ make reload
 - If `./configure` fails, make sure the development packages are installed.
 - If the build cannot find Asterisk headers, install the matching Asterisk dev package for your version.
 - If the driver does not load, check Asterisk module loading and log output first.
+
+## Improved stability on unreliable network connections
+
+This fork includes experimental improvements to the reliability of
+Cisco SCCP phones operating over unstable network connections,
+including VPN links with packet loss, temporary outages and
+interrupted TCP sessions.
+
+Key improvements:
+
+- Automatic recovery from stale SCCP sessions.
+- Improved phone registration after temporary network interruptions.
+- Safer handling of concurrent registration attempts.
+- Improved device and session lifecycle synchronization.
+- Better cleanup of disconnected TCP sessions.
+- Reduced risk of phones remaining in a registration failure state.
+
+### Validation
+
+Tested with Cisco 7912 phones on FreePBX 17 / Asterisk 22.11.0.
+
+During testing:
+- Asterisk successfully registered 17 SCCP devices.
+- A Cisco 7912 automatically re-registered after TCP disconnection.
+- Registration recovered after a simulated 90-second network outage.
+- No manual phone reboot was required.
+
+These changes are experimental. Long-term stability and all possible
+network failure scenarios have not yet been fully validated.
