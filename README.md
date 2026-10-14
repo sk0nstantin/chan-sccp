@@ -8,6 +8,60 @@ It is a compact fork-focused README with the basics only: build, install, and us
 
 English | [Русский](README.ru.md)
 
+## Enhanced SCCP Stability for Unreliable Networks
+
+This fork of [timspb/chan-sccp](https://github.com/timspb/chan-sccp)
+focuses on improving Cisco SCCP phone reliability over unstable
+network connections, including VPN links and intermittent connectivity.
+
+### Key Improvements
+
+- **Automatic registration recovery** after temporary TCP connection loss.
+- **Stale session cleanup** to prevent old SCCP sessions from blocking registration.
+- **Improved reconnection handling** when a phone reconnects before its previous session is fully released.
+- **Safer session synchronization** to reduce race conditions during registration and disconnection.
+- **Improved resource management** for device references, session ownership and worker threads.
+- **Reduced risk of persistent registration failures** requiring manual phone restarts.
+
+### Tested Environment
+
+| Component | Configuration |
+|---|---|
+| PBX | FreePBX 17 |
+| Asterisk | 22.11.0 |
+| Channel driver | chan_sccp |
+| Phones | Cisco 7912, Cisco 7937 |
+| Network | Routed VPN connection |
+| SCCP devices | 17 successfully registered |
+
+### Recovery Tests
+
+The following scenarios were tested with a Cisco 7912:
+
+- TCP connection forcibly terminated on the PBX.
+- A 90-second interruption of server-to-phone TCP traffic.
+- Automatic registration recovery without manually rebooting the phone.
+- Other SCCP devices remained registered during the network interruption.
+
+Both recovery scenarios completed successfully.
+
+### Development Status
+
+**Experimental — stability testing in progress.**
+
+The modifications improve SCCP session recovery but have not yet
+been validated against every possible network failure scenario.
+
+Tested recovery patch: [`454b9309`](https://github.com/sk0nstantin/chan-sccp/commit/454b9309).
+
+### Project Origins
+
+- [Original chan-sccp project](https://github.com/chan-sccp/chan-sccp)
+- [timspb fork](https://github.com/timspb/chan-sccp)
+- [This fork](https://github.com/sk0nstantin/chan-sccp)
+
+---
+
 Known-good target range for this fork:
 
 - FreePBX 16 or 17
@@ -70,32 +124,3 @@ make reload
 - If `./configure` fails, make sure the development packages are installed.
 - If the build cannot find Asterisk headers, install the matching Asterisk dev package for your version.
 - If the driver does not load, check Asterisk module loading and log output first.
-
-## Improved stability on unreliable network connections
-
-This fork includes experimental improvements to the reliability of
-Cisco SCCP phones operating over unstable network connections,
-including VPN links with packet loss, temporary outages and
-interrupted TCP sessions.
-
-Key improvements:
-
-- Automatic recovery from stale SCCP sessions.
-- Improved phone registration after temporary network interruptions.
-- Safer handling of concurrent registration attempts.
-- Improved device and session lifecycle synchronization.
-- Better cleanup of disconnected TCP sessions.
-- Reduced risk of phones remaining in a registration failure state.
-
-### Validation
-
-Tested with Cisco 7912 phones on FreePBX 17 / Asterisk 22.11.0.
-
-During testing:
-- Asterisk successfully registered 17 SCCP devices.
-- A Cisco 7912 automatically re-registered after TCP disconnection.
-- Registration recovered after a simulated 90-second network outage.
-- No manual phone reboot was required.
-
-These changes are experimental. Long-term stability and all possible
-network failure scenarios have not yet been fully validated.
